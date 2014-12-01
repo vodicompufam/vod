@@ -1,4 +1,5 @@
 <h3>Categorias</h3>
+<?php echo '<pre>'; print_r($modelCategoriaMongoDB); ?>
 <?php 
     $this->widget('zii.widgets.grid.CGridView', array(
 	'dataProvider'=>$dataProvider,

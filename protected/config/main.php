@@ -17,6 +17,7 @@ return array(
 	'import'=>array(
 		'application.models.*',
 		'application.components.*',
+                'ext.YiiMongoDbSuite.*',
 	),
         'aliases' => array(
 		'xupload' => 'ext.xupload',
@@ -53,6 +54,15 @@ return array(
 				'<controller:\w+>/<action:\w+>'=>'<controller>/<action>',
 			),
 		),
+            
+                'mongodb' => array(
+                  'class'            => 'EMongoDB',
+                  'connectionString' => 'mongodb://localhost',
+                  'dbName'           => 'vod',
+                  'fsyncFlag'        => true,
+                  'safeFlag'         => true,
+                  'useCursor'        => false
+                ),
                 
 		/*
 		'db'=>array(

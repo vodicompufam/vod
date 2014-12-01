@@ -1,31 +1,28 @@
 <?php
+/**
+ * This is the template for generating a controller class file for CRUD feature.
+ * The following variables are available in this template:
+ * - $this: the CrudCode object
+ */
+?>
+<?php echo "<?php\n"; ?>
 
-class CategoriasController extends Controller
+class <?php echo $this->controllerClass; ?> extends <?php echo $this->baseControllerClass."\n"; ?>
 {
 	/**
 	 * @var string the default layout for the views. Defaults to '//layouts/column2', meaning
 	 * using two-column layout. See 'protected/views/layouts/column2.php'.
 	 */
-	public $layout='//layouts/column1';
+	public $layout='//layouts/column2';
 
-        
-        public function init() {
-            parent::init();
-            if(Yii::app()->user->isGuest){
-                $this->redirect(Yii::app()->homeUrl);
-            }
-        }
-
-        
 	/**
 	 * @return array action filters
 	 */
 	public function filters()
 	{
-		/*return array(
+		return array(
 			'accessControl', // perform access control for CRUD operations
-			'postOnly + delete', // we only allow deletion via POST request
-		);*/
+		);
 	}
 
 	/**
@@ -71,16 +68,16 @@ class CategoriasController extends Controller
 	 */
 	public function actionCreate()
 	{
-		$model=new Categoria;
+		$model=new <?php echo $this->modelClass; ?>;
 
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 
-		if(isset($_POST['Categoria']))
+		if(isset($_POST['<?php echo $this->modelClass; ?>']))
 		{
-			$model->attributes=$_POST['Categoria'];
+			$model->attributes=$_POST['<?php echo $this->modelClass; ?>'];
 			if($model->save())
-				$this->redirect(array('view','id'=>$model->cate_id));
+				$this->redirect(array('view','id'=>$model-><?php echo $this->modelObject->primaryKey(); ?>));
 		}
 
 		$this->render('create',array(
@@ -100,11 +97,11 @@ class CategoriasController extends Controller
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 
-		if(isset($_POST['Categoria']))
+		if(isset($_POST['<?php echo $this->modelClass; ?>']))
 		{
-			$model->attributes=$_POST['Categoria'];
+			$model->attributes=$_POST['<?php echo $this->modelClass; ?>'];
 			if($model->save())
-				$this->redirect(array('view','id'=>$model->cate_id));
+				$this->redirect(array('view','id'=>$model-><?php echo $this->modelObject->primaryKey(); ?>));
 		}
 
 		$this->render('update',array(
@@ -114,16 +111,22 @@ class CategoriasController extends Controller
 
 	/**
 	 * Deletes a particular model.
-	 * If deletion is successful, the browser will be redirected to the 'admin' page.
+	 * If deletion is successful, the browser will be redirected to the 'index' page.
 	 * @param integer $id the ID of the model to be deleted
 	 */
 	public function actionDelete($id)
 	{
-		$this->loadModel($id)->delete();
+		if(Yii::app()->request->isPostRequest)
+		{
+			// we only allow deletion via POST request
+			$this->loadModel($id)->delete();
 
-		// if AJAX request (triggered by deletion via admin grid view), we should not redirect the browser
-		if(!isset($_GET['ajax']))
-			$this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('admin'));
+			// if AJAX request (triggered by deletion via admin grid view), we should not redirect the browser
+			if(!isset($_GET['ajax']))
+				$this->redirect(isset($_POST['returnUrl']) ? $_POST['returnUrl'] : array('admin'));
+		}
+		else
+			throw new CHttpException(400,'Invalid request. Please do not repeat this request again.');
 	}
 
 	/**
@@ -131,12 +134,9 @@ class CategoriasController extends Controller
 	 */
 	public function actionIndex()
 	{
-		$dataProvider=new CActiveDataProvider('Categoria');
-                $modelCategoriaMongoDB = CategoriaMongoDB::model()->findAll();
-                
+		$dataProvider=new EMongoDocumentDataProvider('<?php echo $this->modelClass; ?>');
 		$this->render('index',array(
 			'dataProvider'=>$dataProvider,
-                        'modelCategoriaMongoDB'=>$modelCategoriaMongoDB,
 		));
 	}
 
@@ -145,26 +145,25 @@ class CategoriasController extends Controller
 	 */
 	public function actionAdmin()
 	{
-		$model=new Categoria('search');
-		$model->unsetAttributes();  // clear any default values
-		if(isset($_GET['Categoria']))
-			$model->attributes=$_GET['Categoria'];
+		$model = new <?php echo $this->modelClass; ?>('search');
+		$model->unsetAttributes();
 
-		$this->render('admin',array(
-			'model'=>$model,
+		if(isset($_GET['<?php echo $this->modelClass; ?>']))
+			$model->setAttributes($_GET['<?php echo $this->modelClass; ?>']);
+
+		$this->render('admin', array(
+			'model'=>$model
 		));
 	}
 
 	/**
 	 * Returns the data model based on the primary key given in the GET variable.
 	 * If the data model is not found, an HTTP exception will be raised.
-	 * @param integer $id the ID of the model to be loaded
-	 * @return Categoria the loaded model
-	 * @throws CHttpException
+	 * @param integer the ID of the model to be loaded
 	 */
 	public function loadModel($id)
 	{
-		$model=Categoria::model()->findByPk($id);
+		$model=<?php echo $this->modelClass; ?>::model()->findByPk(<?php echo ($this->modelObject->primaryKey() === '_id') ? 'new MongoId($id)' : '$id'; ?>);
 		if($model===null)
 			throw new CHttpException(404,'The requested page does not exist.');
 		return $model;
@@ -172,11 +171,11 @@ class CategoriasController extends Controller
 
 	/**
 	 * Performs the AJAX validation.
-	 * @param Categoria $model the model to be validated
+	 * @param CModel the model to be validated
 	 */
 	protected function performAjaxValidation($model)
 	{
-		if(isset($_POST['ajax']) && $_POST['ajax']==='categoria-form')
+		if(isset($_POST['ajax']) && $_POST['ajax']==='<?php echo $this->class2id($this->modelClass); ?>-form')
 		{
 			echo CActiveForm::validate($model);
 			Yii::app()->end();
